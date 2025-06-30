@@ -1,0 +1,14 @@
+# PlaylistPlus
+<p> Adds a song you're currently listening to on Spotify to your playlist </p>
+
+---
+
+# How to use:
+<p> Copy and paste playlist link</p>
+<p> Choose your bind (alt+shift+s by default) </p>
+<p> Save and run. It will close window and work in background </p>
+<p> Wait for caching </p>
+<p> It will close window and work in tray</p>
+[Schowcase]()
+<p> To change settings: find app in hidden icons (it's called notification area) > Settings > Change > Save </p>
+<p> If you don't want to save changes, just close window </p>

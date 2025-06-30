@@ -1,0 +1,33 @@
+QWidget {
+    background-color:rgb(212, 212, 212);
+    color:rgb(0, 0, 0);
+    font-family: Arial;
+    font-size: 10pt;
+}
+QPushButton {
+    background-color:rgb(176, 192, 194);
+    color:rgb(0, 0, 0);
+    border: 1px solid rgb(170, 170, 170);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+QPushButton:hover {
+    background-color:rgb(169, 180, 182);
+}
+QLineEdit, QTextEdit {
+    background-color:rgb(174, 182, 188);
+    color:rgb(0, 0, 0);
+    border: 1px solid rgb(170, 170, 170);
+}
+QMenu {
+    background-color:rgb(212, 212, 212);
+    color:rgb(0, 0, 0);
+}
+QMenu::item:selected {
+    background-color:rgb(194, 203, 209);
+}
+QToolTip {
+    background-color:rgb(190, 198, 204);
+    color:rgb(0, 0, 0);
+    border: 1px solid rgb(170, 170, 170);
+}
