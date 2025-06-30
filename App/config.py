@@ -17,7 +17,7 @@ CLIENT_SECRET = '839c34d9e4a647e7a5437cc38e0bf5ac'
 REDIRECT_URI = 'http://127.0.0.1:8888/callback'
 SCOPE = 'user-read-playback-state playlist-modify-public playlist-read-private'
 ICON_PATH = APPDATA / 'icon.ico'
-ICON_URL = 'https://raw.githubusercontent.com/d1pl6/PlaylistPlus/main/icon.ico'
+ICON_URL = 'https://raw.githubusercontent.com/d1pl6/PlaylistPlus/heads/main/App/resources/icon.ico'
 
 def load_config():
     logging.debug("load_config() called")

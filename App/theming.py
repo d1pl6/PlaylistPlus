@@ -6,9 +6,9 @@ from styles import DEFAULT_DARK_QSS
 from config import APPDATA
 
 THEMES_DIR = APPDATA / "themes"
-DEFAULT_THEME_URL = "https://raw.githubusercontent.com/d1pl6/PlaylistPlus/heads/main/dark.qss"
+DEFAULT_THEME_URL = "https://raw.githubusercontent.com/d1pl6/PlaylistPlus/heads/main/App/themes/dark.qss"
 DEFAULT_THEME_FILENAME = "dark.qss"
-LIGHT_THEME_URL = "https://raw.githubusercontent.com/d1pl6/PlaylistPlus/heads/main/light.qss"
+LIGHT_THEME_URL = "https://raw.githubusercontent.com/d1pl6/PlaylistPlus/heads/main/App/themes/light.qss"
 LIGHT_THEME_FILENAME = "light.qss"
 
 def download_light_theme():
