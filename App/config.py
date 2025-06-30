@@ -4,7 +4,8 @@ from pathlib import Path
 import os
 from spotipy.oauth2 import SpotifyOAuth
 import urllib.request
-
+from dotenv import load_dotenv
+load_dotenv()
 APP_NAME = "PlaylistPlus"
 APPDATA = Path(os.getenv('APPDATA')) / APP_NAME
 CONFIG_PATH = APPDATA / 'config.json'
@@ -12,8 +13,8 @@ TOKEN_CACHE_PATH = APPDATA / '.spotify_token_cache'
 
 APPDATA.mkdir(parents=True, exist_ok=True)
 
-CLIENT_ID = 'd706eaaa15ce48dabb9cc33ff2e2a9e4'
-CLIENT_SECRET = '839c34d9e4a647e7a5437cc38e0bf5ac'
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 REDIRECT_URI = 'http://127.0.0.1:8888/callback'
 SCOPE = 'user-read-playback-state playlist-modify-public playlist-read-private'
 ICON_PATH = APPDATA / 'icon.ico'
