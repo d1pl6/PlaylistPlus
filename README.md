@@ -9,6 +9,6 @@
 <p> Save and run. It will close window and work in background </p>
 <p> Wait for caching </p>
 <p> It will close window and work in tray</p>
-[Schowcase]()
 <p> To change settings: find app in hidden icons (it's called notification area) > Settings > Change > Save </p>
+[img](https://github.com/user-attachments/assets/0a795e9e-dc65-46f7-8996-26d8b126ea2a)
 <p> If you don't want to save changes, just close window </p>
