@@ -1,3 +1,4 @@
+
 import os
 import json
 import logging
@@ -10,6 +11,12 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from config import get_auth_manager
 from helpers import extract_playlist_id
 from dotenv import load_dotenv
+# For Windows notifications
+try:
+    from win10toast import ToastNotifier
+    toaster = ToastNotifier()
+except ImportError:
+    toaster = None
 
 load_dotenv()
 
@@ -156,5 +163,15 @@ def update_cache_in_thread(playlist_id):
         with playlist_cache_lock:
             playlist_cache = track_ids
         logging.info(f"Cache updated: {len(track_ids)} tracks")
+        if toaster:
+            try:
+                toaster.show_toast(
+                    "PlaylistPlus",
+                    f"Playlist cache updated: {len(track_ids)} tracks",
+                    threaded=True
+                )
+            except Exception as notify_err:
+                logging.warning(f"Failed to show Windows notification: {notify_err}")
+            return 0
     except Exception as e:
         logging.critical(f"update_cache_in_thread failed: {e}", exc_info=True)

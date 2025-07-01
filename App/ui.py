@@ -141,6 +141,7 @@ class ConfigDialog(QtWidgets.QDialog):
     def reset_fields(self):
         self.playlist_input.setText(self.initial_playlist_url)
         self.hotkey_input.setText(self.initial_hotkey)
+        self.already_added_label.setVisible(False)
         self.load_playlist_info()
 
     def closeEvent(self, event):
@@ -183,6 +184,8 @@ class ConfigDialog(QtWidgets.QDialog):
 
     def load_playlist_info(self):
         url = self.playlist_input.text().strip()
+        # Always hide already_added_label when playlist link changes
+        self.already_added_label.setVisible(False)
         if not url or "open.spotify.com" not in url:
             self.playlist_name_label.setText("No playlist loaded")
             self.playlist_image_label.clear()
@@ -283,14 +286,13 @@ class TrayApp(QtWidgets.QSystemTrayIcon):
         else:
             self.theme_action.setText("Toggle Dark Theme")
     def open_settings(self):
-        if self.dialog is None:
-            config = load_config()
-            self.dialog = ConfigDialog(
-                config.get("playlist_url", ""),
-                config.get("hotkey", "")
-            )
-            self.dialog.feedback_signal.connect(self.dialog.show_feedback)
-            self.dialog.finished.connect(self.on_dialog_closed)
+        config = load_config()
+        self.dialog = ConfigDialog(
+            config.get("playlist_url", ""),
+            config.get("hotkey", "")
+        )
+        self.dialog.feedback_signal.connect(self.dialog.show_feedback)
+        self.dialog.finished.connect(self.on_dialog_closed)
         self.dialog.show()
         self.dialog.raise_()
         self.dialog.activateWindow()
@@ -317,7 +319,8 @@ class TrayApp(QtWidgets.QSystemTrayIcon):
                 }
                 save_config(updated_config)
                 update_cache_in_thread(playlist_id)
-                register_hotkey(new_hotkey, add_current_track)
+                from functools import partial
+                register_hotkey(new_hotkey, partial(add_current_track, tray_icon=self))
 
         if self.dialog:
             self.dialog.deleteLater()
