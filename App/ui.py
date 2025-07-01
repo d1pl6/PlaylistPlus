@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QTimer
 import os
 from pathlib import Path
 from config import load_config, save_config
@@ -18,6 +18,7 @@ def run_app():
 
 class ConfigDialog(QtWidgets.QDialog):
     feedback_signal = pyqtSignal(str, bytes)
+    already_added_signal = pyqtSignal()
 
     def __init__(self, playlist_url="", hotkey=""):
         super().__init__()
@@ -55,6 +56,12 @@ class ConfigDialog(QtWidgets.QDialog):
 
         self.setWindowIcon(QtGui.QIcon(str(self._get_icon_path())))
 
+        self.already_added_label = QtWidgets.QLabel("")
+        self.already_added_label.setObjectName("alreadyAddedLabel")
+        self.already_added_label.setVisible(False)
+        self.already_added_label.setAlignment(QtCore.Qt.AlignVCenter)
+        self.already_added_signal.connect(self.show_already_added)
+
         self.playlist_image_label = QtWidgets.QLabel()
         self.playlist_image_label.setFixedSize(64, 64)
         self.playlist_image_label.setScaledContents(True)
@@ -89,7 +96,9 @@ class ConfigDialog(QtWidgets.QDialog):
 
         self.recently_added_widget = self._build_recently_added_block()
 
+        # Layout setup
         layout.addLayout(playlist_info_layout)
+        layout.addWidget(self.already_added_label)
         layout.addWidget(self.recently_added_widget)
         layout.addWidget(QtWidgets.QLabel("Link to playlist:"))
         layout.addWidget(self.playlist_input)
@@ -136,17 +145,28 @@ class ConfigDialog(QtWidgets.QDialog):
 
     def closeEvent(self, event):
         if self.loader_thread and self.loader_thread.isRunning():
-            self.loader_thread.quit()
-            self.loader_thread.wait()
-        self.reset_fields()
-        event.ignore()
-        self.hide()
+            QtWidgets.QMessageBox.information(
+                self, "Please wait", "Caching is still running. The window will close when done."
+            )
+            self.setEnabled(False)
+            def check_thread():
+                if not self.loader_thread.isRunning():
+                    self.loader_thread.wait()  # Wait for thread cleanup
+                    self.setEnabled(True)
+                    self.reset_fields()
+                    QtWidgets.QDialog.accept(self)
+                else:
+                    QTimer.singleShot(200, check_thread)
+            QTimer.singleShot(200, check_thread)
+            event.ignore()
+        else:
+            self.reset_fields()
+            QtWidgets.QDialog.accept(self)
 
     def save_and_hide(self):
-        print("save_and_hide called")
         self.initial_playlist_url = self.playlist_input.text()
         self.initial_hotkey = self.hotkey_input.text()
-        self.accept()
+        self.close()  # This will trigger closeEvent
 
     def show_feedback(self, text, image_data=None):
         self.track_info_label.setText(text)
@@ -190,6 +210,16 @@ class ConfigDialog(QtWidgets.QDialog):
 
     def _get_icon_path(self):
         return Path(os.getenv('APPDATA')) / 'PlaylistPlus' / 'icon.ico'
+    
+    # Show a temporary message that a track is already in the playlist
+    def show_already_added(self):
+        self.already_added_label.setText("Track is already in playlist")
+        self.already_added_label.setVisible(True)
+        QTimer.singleShot(5000, self.hide_already_added)
+
+    def hide_already_added(self):
+        self.already_added_label.clear()
+        self.already_added_label.setVisible(False)
 
 # === Hotkey line edit ===
 class HotkeyLineEdit(QtWidgets.QLineEdit):

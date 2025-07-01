@@ -41,6 +41,6 @@ def save_cache(track_ids):
     try:
         with open(CACHE_PATH, 'w') as f:
             json.dump(list(track_ids), f)
-        print("Cache saved to disk")
+        print("Cache saved")
     except Exception as e:
         logging.error(f"Failed to save cache: {e}")

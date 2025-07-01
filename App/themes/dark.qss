@@ -31,3 +31,8 @@ QToolTip {
     color: #ffffff;
     border: 1px solid #555555;
 }
+QLabel#alreadyAddedLabel {
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+    font-size: 16px;
+}

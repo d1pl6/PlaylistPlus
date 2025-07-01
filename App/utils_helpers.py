@@ -37,12 +37,15 @@ def add_current_track(tray_icon=None):
 
         if in_cache:
             logging.debug(f"Already in playlist: {track_name}")
-        else:
-            sp.playlist_add_items(playlist_id, [track_id])
-            with playlist_cache_lock:
-                disk_cache.add(track_id)
-                save_cache(disk_cache)
-            logging.debug(f"Added: {track_name} - {artists}")
+            if tray_icon and hasattr(tray_icon, "dialog") and tray_icon.dialog:
+                tray_icon.dialog.already_added_signal.emit()
+            return  # Do not add again
+
+        sp.playlist_add_items(playlist_id, [track_id])
+        with playlist_cache_lock:
+            disk_cache.add(track_id)
+            save_cache(disk_cache)
+        logging.debug(f"Added: {track_name} - {artists}")
         logging.info("Hotkey pressed, adding track...")
     except Exception as e:
         logging.exception("[ERROR] Exception in add_current_track:")
