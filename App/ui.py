@@ -143,6 +143,7 @@ class ConfigDialog(QtWidgets.QDialog):
         self.hide()
 
     def save_and_hide(self):
+        print("save_and_hide called")
         self.initial_playlist_url = self.playlist_input.text()
         self.initial_hotkey = self.hotkey_input.text()
         self.accept()
@@ -190,7 +191,7 @@ class ConfigDialog(QtWidgets.QDialog):
     def _get_icon_path(self):
         return Path(os.getenv('APPDATA')) / 'PlaylistPlus' / 'icon.ico'
 
-
+# === Hotkey line edit ===
 class HotkeyLineEdit(QtWidgets.QLineEdit):
     def __init__(self):
         super().__init__()
@@ -265,6 +266,7 @@ class TrayApp(QtWidgets.QSystemTrayIcon):
         self.dialog.activateWindow()
 
     def on_dialog_closed(self):
+        print("on_dialog_closed called")
         if self.dialog and self.dialog.result() == QtWidgets.QDialog.Accepted:
             new_url, new_hotkey = self.dialog.get_data()
             if not new_url.strip():

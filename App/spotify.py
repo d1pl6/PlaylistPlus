@@ -146,11 +146,12 @@ def get_album_art(track):
 
 playlist_cache = set()
 playlist_cache_lock = threading.Lock()
-
 def update_cache_in_thread(playlist_id):
     global playlist_cache
+    logging.info(f"update_cache_in_thread called with: {playlist_id}")
     try:
         logging.info(f"Starting cache update for playlist: {playlist_id}")
+        print(f"Updating cache for playlist_id: {playlist_id}")
         track_ids = build_initial_cache(playlist_id)
         with playlist_cache_lock:
             playlist_cache = track_ids

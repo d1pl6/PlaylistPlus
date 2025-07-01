@@ -4,6 +4,7 @@ from pathlib import Path
 from config import load_config
 import spotipy
 from spotify_helpers import auth_manager, playlist_cache_lock, playlist_cache, save_cache
+from spotify import load_cache
 
 # === Adding current track ===
 def add_current_track(tray_icon=None):
@@ -29,19 +30,21 @@ def add_current_track(tray_icon=None):
         track_name = track['name']
         artists = ", ".join(artist['name'] for artist in track['artists'])
 
+        # Load cache from disk, add new track, and save
         with playlist_cache_lock:
-            in_cache = track_id in playlist_cache
+            disk_cache = load_cache()
+            in_cache = track_id in disk_cache
 
         if in_cache:
             logging.debug(f"Already in playlist: {track_name}")
         else:
             sp.playlist_add_items(playlist_id, [track_id])
             with playlist_cache_lock:
-                playlist_cache.add(track_id)
-                save_cache(playlist_cache)
+                disk_cache.add(track_id)
+                save_cache(disk_cache)
             logging.debug(f"Added: {track_name} - {artists}")
         logging.info("Hotkey pressed, adding track...")
-    except Exception:
+    except Exception as e:
         logging.exception("[ERROR] Exception in add_current_track:")
 
     if tray_icon and tray_icon.dialog:
