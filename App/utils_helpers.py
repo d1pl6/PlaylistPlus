@@ -3,8 +3,7 @@ import urllib.request
 from pathlib import Path
 from config import load_config
 import spotipy
-from spotify_helpers import auth_manager, playlist_cache_lock, playlist_cache, save_cache
-from spotify import load_cache
+from spotify import load_cache, auth_manager, playlist_cache_lock, save_cache
 
 # === Adding current track ===
 def add_current_track(tray_icon=None):

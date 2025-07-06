@@ -22,7 +22,6 @@ ICON_PATH = APPDATA / 'icon.ico'
 ICON_URL = 'https://raw.githubusercontent.com/d1pl6/PlaylistPlus/heads/main/App/resources/icon.ico'
 
 def load_config():
-    logging.debug("load_config() called")
     if CONFIG_PATH.exists():
         try:
             with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
@@ -36,11 +35,9 @@ def load_config():
     return {}
 
 def save_config(data):
-    logging.debug(f"save_config() called with data: {data}")
     try:
         with open(CONFIG_PATH, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        logging.info("Config saved successfully")
     except Exception as e:
         logging.error(f"save_config() failed: {e}", exc_info=True)
 
@@ -56,7 +53,6 @@ def ensure_icon():
     if not ICON_PATH.exists():
         try:
             urllib.request.urlretrieve(ICON_URL, ICON_PATH)
-            logging.debug("Icon successfully downloaded")
         except Exception as e:
             logging.debug(f"Error downloading icon: {e}")
 ensure_icon()

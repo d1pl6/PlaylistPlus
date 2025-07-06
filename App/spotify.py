@@ -12,12 +12,6 @@ from config import get_auth_manager
 from helpers import extract_playlist_id
 from dotenv import load_dotenv
 load_dotenv()
-# For Windows notifications
-try:
-    from win10toast import ToastNotifier
-    toaster = ToastNotifier()
-except ImportError:
-    toaster = None
 
 # === Constants and Paths ===
 APP_NAME = "PlaylistPlus"
@@ -137,6 +131,7 @@ def get_current_track():
 def add_track_to_playlist(playlist_id, track_id):
     try:
         sp.playlist_add_items(playlist_id, [track_id])
+        print(f"Track  added to playlist {playlist_id}")
     except Exception as e:
         logging.error(f"Failed to add track to playlist: {e}")
 
@@ -162,15 +157,5 @@ def update_cache_in_thread(playlist_id):
         with playlist_cache_lock:
             playlist_cache = track_ids
         logging.info(f"Cache updated: {len(track_ids)} tracks")
-        if toaster:
-            try:
-                toaster.show_toast(
-                    "PlaylistPlus",
-                    f"Playlist cache updated: {len(track_ids)} tracks",
-                    threaded=True
-                )
-            except Exception as notify_err:
-                logging.warning(f"Failed to show Windows notification: {notify_err}")
-            return 0
     except Exception as e:
         logging.critical(f"update_cache_in_thread failed: {e}", exc_info=True)
