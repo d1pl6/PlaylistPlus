@@ -10,13 +10,13 @@ user32 = ctypes.windll.user32
 keyboard_state = (ctypes.c_byte * 256)()
 buf = ctypes.create_unicode_buffer(8)
 
-def get_foreground_layout():
+def get_foreground_layout() -> int:
     hwnd = win32gui.GetForegroundWindow()
     thread_id = win32process.GetWindowThreadProcessId(hwnd)[0]
     layout = user32.GetKeyboardLayout(thread_id)
     return layout
 
-def get_key_char_win(vk_code):
+def get_key_char_win(vk_code: int) -> str | None:
     layout = get_foreground_layout()
     user32.GetKeyboardState(ctypes.byref(keyboard_state))
     result = user32.ToUnicodeEx(
@@ -30,7 +30,7 @@ def get_key_char_win(vk_code):
     )
     return buf.value if result > 0 and buf.value else None
 
-def register_hotkey(hotkey_str, callback):
+def register_hotkey(hotkey_str: str, callback):
     global hotkey_listener
 
     if hotkey_listener:
@@ -66,7 +66,7 @@ def stop_hotkey_listener():
         hotkey_listener.stop()
         hotkey_listener = None
 
-def normalize_key(key):
+def normalize_key(key) -> str | None:
     from pynput.keyboard import Key, KeyCode
     if isinstance(key, KeyCode):
         char = get_key_char_win(key.vk)

@@ -146,23 +146,11 @@ class ConfigDialog(QtWidgets.QDialog):
 
     def closeEvent(self, event):
         if self.loader_thread and self.loader_thread.isRunning():
-            QtWidgets.QMessageBox.information(
-                self, "Please wait", "Caching is still running. The window will close when done."
-            )
-            self.setEnabled(False)
-            def check_thread():
-                if not self.loader_thread.isRunning():
-                    self.loader_thread.wait()  # Wait for thread cleanup
-                    self.setEnabled(True)
-                    self.reset_fields()
-                    QtWidgets.QDialog.accept(self)
-                else:
-                    QTimer.singleShot(200, check_thread)
-            QTimer.singleShot(200, check_thread)
-            event.ignore()
-        else:
-            self.reset_fields()
-            QtWidgets.QDialog.accept(self)
+            print("Waiting for loader_thread to finish before closing dialog...")
+            self.loader_thread.wait()  # Block until thread is done
+            self.loader_thread = None
+        self.reset_fields()
+        super().closeEvent(event)
 
     def save_and_hide(self):
         self.initial_playlist_url = self.playlist_input.text()
@@ -298,31 +286,44 @@ class TrayApp(QtWidgets.QSystemTrayIcon):
         self.dialog.activateWindow()
 
     def on_dialog_closed(self):
-        print("on_dialog_closed called")
+        print("Dialog closed called")
+        # Only process if dialog was accepted (Save and run)
         if self.dialog and self.dialog.result() == QtWidgets.QDialog.Accepted:
             new_url, new_hotkey = self.dialog.get_data()
-            if not new_url.strip():
-                return
-            playlist_id = extract_playlist_id(new_url)
-            if not playlist_id:
-                return
-            old_config = load_config()
-            old_url = old_config.get("playlist_url", "")
-            old_hotkey = old_config.get("hotkey", "")
+            if not new_url or not new_url.strip():
+                print("No URL provided, not updating config.")
+            else:
+                playlist_id = extract_playlist_id(new_url)
+                if not playlist_id:
+                    print("Invalid playlist URL, not updating config.")
+                else:
+                    old_config = load_config()
+                    old_url = old_config.get("playlist_url", "")
+                    old_hotkey = old_config.get("hotkey", "")
 
-            if new_url != old_url or new_hotkey != old_hotkey:
-                updated_config = {
-                    "playlist_url": new_url,
-                    "playlist_id": playlist_id,
-                    "hotkey": new_hotkey,
-                    "dark_theme": old_config.get("dark_theme", False)
-                }
-                save_config(updated_config)
-                update_cache_in_thread(playlist_id)
-                from functools import partial
-                register_hotkey(new_hotkey, partial(add_current_track, tray_icon=self))
+                    if new_url != old_url or new_hotkey != old_hotkey:
+                        updated_config = {
+                            "playlist_url": new_url,
+                            "playlist_id": playlist_id,
+                            "hotkey": new_hotkey,
+                            "dark_theme": old_config.get("dark_theme", False)
+                        }
+                        save_config(updated_config)
+                        update_cache_in_thread(playlist_id)
+                        from functools import partial
+                        register_hotkey(new_hotkey, partial(add_current_track, tray_icon=self))
 
+        # Always clean up the dialog and ensure loader_thread is stopped
         if self.dialog:
+            # Defensive: stop loader_thread if running
+            try:
+                if hasattr(self.dialog, "loader_thread") and self.dialog.loader_thread:
+                    if self.dialog.loader_thread.isRunning():
+                        print("Waiting for loader_thread to finish before deleting dialog...")
+                        self.dialog.loader_thread.wait()
+                    self.dialog.loader_thread = None
+            except Exception as e:
+                print(f"Error while cleaning up loader_thread: {e}")
             self.dialog.deleteLater()
             self.dialog = None
 

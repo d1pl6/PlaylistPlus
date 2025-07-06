@@ -6,7 +6,7 @@ import threading
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
-load_dotenv() 
+load_dotenv()
 
 # === Constants and Paths ===
 APP_NAME = "PlaylistPlus"

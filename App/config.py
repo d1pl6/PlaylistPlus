@@ -6,6 +6,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import urllib.request
 from dotenv import load_dotenv
 load_dotenv()
+
 APP_NAME = "PlaylistPlus"
 APPDATA = Path(os.getenv('APPDATA')) / APP_NAME
 CONFIG_PATH = APPDATA / 'config.json'

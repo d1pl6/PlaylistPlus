@@ -47,7 +47,7 @@ def add_current_track(tray_icon=None):
             save_cache(disk_cache)
         logging.debug(f"Added: {track_name} - {artists}")
         logging.info("Hotkey pressed, adding track...")
-    except Exception as e:
+    except Exception:
         logging.exception("[ERROR] Exception in add_current_track:")
 
     if tray_icon and tray_icon.dialog:

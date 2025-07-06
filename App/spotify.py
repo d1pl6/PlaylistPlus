@@ -11,14 +11,13 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from config import get_auth_manager
 from helpers import extract_playlist_id
 from dotenv import load_dotenv
+load_dotenv()
 # For Windows notifications
 try:
     from win10toast import ToastNotifier
     toaster = ToastNotifier()
 except ImportError:
     toaster = None
-
-load_dotenv()
 
 # === Constants and Paths ===
 APP_NAME = "PlaylistPlus"
