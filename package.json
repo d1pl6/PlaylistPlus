@@ -24,27 +24,38 @@
       "package.json"
     ],
     "win": {
-      "target": "portable",
+      "target": ["portable", "nsis"],
       "icon": "assets/icons/app_icon.ico"
     }
   },
-  "dependencies": {
-    "better-sqlite3": "^12.4.1",
-    "crypto": "^1.0.1",
-    "dns": "^0.1.2",
-    "electron": "^38.2.0",
-    "electron-builder": "^26.0.12",
-    "express": "^5.1.0",
-    "fs": "^0.0.1-security",
-    "keytar": "^7.9.0",
-    "node-fetch": "^3.3.2",
-    "open": "^10.2.0",
-    "path": "^0.12.7",
-    "typescript": "^5.9.3"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d1pl6/PlaylistPlus.git"
   },
+  "bugs": {
+    "url": "https://github.com/d1pl6/PlaylistPlus/issues"
+  },
+  "homepage": "https://github.com/d1pl6/PlaylistPlus#readme",
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
+    "@types/electron": "^1.4.38",
     "@types/express": "^5.0.3",
-    "electron-rebuild": "^3.2.9"
+    "@types/keytar": "^4.4.0",
+    "@types/node": "^24.6.1",
+    "@types/node-fetch": "^2.6.13",
+    "copyfiles": "^2.4.1",
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12",
+    "electron-rebuild": "^3.2.9",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.1.0",
+    "keytar": "^7.9.0",
+    "node-fetch": "^3.3.2",
+    "open": "^10.2.0"
   }
 }
