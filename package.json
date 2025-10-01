@@ -1,0 +1,50 @@
+{
+  "name": "playlistplusts",
+  "version": "1.0.0",
+  "description": "Allows adding songs to playlist via keybind.",
+  "author": "d1pl",
+  "license": "ISC",
+  "keywords": [],
+  "type": "commonjs",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.js",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder"
+  },
+  "build": {
+    "appId": "com.d1pl.playlistplus",
+    "productName": "Playlist Plus",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "assets/icons/app_icon.ico"
+    }
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "crypto": "^1.0.1",
+    "dns": "^0.1.2",
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "keytar": "^7.9.0",
+    "node-fetch": "^3.3.2",
+    "open": "^10.2.0",
+    "path": "^0.12.7",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.3",
+    "electron-rebuild": "^3.2.9"
+  }
+}
