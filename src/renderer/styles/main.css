@@ -176,9 +176,10 @@ body::-webkit-scrollbar-thumb {
 }
 
 .alreadyExists {
-  font-weight: bold;
   text-align: center;
   font-size: 14px;
+  font-weight: bold;
+  height: 16px;
   color: #ec0000;
 }
 

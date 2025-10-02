@@ -649,6 +649,9 @@ window.api.onTrackAlreadyExists((playlistIndex: number, trackName: string) => {
   const playlistDiv = document.querySelectorAll(".alreadyKeyinput")[playlistIndex - 1];
   if (!playlistDiv) return;
 
+  const existingMsg = playlistDiv.querySelector(".alreadyExists");
+  if (existingMsg) return;
+
   const alreadyExists = document.createElement("p");
   alreadyExists.classList.add("alreadyExists");
   alreadyExists.textContent = `Track already exists in playlist`;
@@ -657,7 +660,7 @@ window.api.onTrackAlreadyExists((playlistIndex: number, trackName: string) => {
 
   setTimeout(() => {
     alreadyExists.remove();
-  }, 2000); // 2 seconds
+  }, 2000);
 });
 
 // === EVENT LISTENERS === \\
