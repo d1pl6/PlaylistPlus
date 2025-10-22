@@ -1,17 +1,13 @@
 {
   "name": "playlistplusts",
-  "version": "1.0.1",
+  "displayName": "Playlist Plus",
+  "version": "1.0.2",
   "description": "Allows adding songs to playlist via keybind.",
-  "author": "d1pl",
+  "author": {"name": "d1pl", "email": "no@mail.com"},
   "license": "ISC",
   "keywords": [],
   "type": "commonjs",
   "main": "dist/main.js",
-  "scripts": {
-    "build": "tsc && node scripts/copy-assets.js",
-    "start": "npm run build && electron .",
-    "dist": "npm run build && electron-builder"
-  },
   "build": {
     "appId": "com.d1pl.playlistplus",
     "productName": "Playlist Plus",
@@ -26,7 +22,33 @@
     "win": {
       "target": ["portable", "nsis"],
       "icon": "assets/icons/app_icon.ico"
+    },
+    "linux": {
+      "target": ["deb", "rpm", "snap", "AppImage"],
+      "icon": "assets/icons/app_icon.png",
+      "category": "Utility"
+    },
+    "mac": {
+      "target": ["dmg", "pkg"],
+      "icon": "assets/icons/app_icon.icns",
+      "category": "public.app-category.utilities"
     }
+  },
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.js",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder install-app-deps && electron-builder",
+
+    "dist_win_portable": "npm run build && electron-builder --win --config.extraMetadata.portable=true",
+    "dist_win_nsis": "npm run build && electron-builder --win --config.extraMetadata.portable=false",
+
+    "dist_linux_deb": "npm run build && electron-builder --linux --config.linux.target=deb",
+    "dist_linux_rpm": "npm run build && electron-builder --linux --config.linux.target=rpm",
+    "dist_linux_snap": "npm run build && electron-builder --linux --config.linux.target=snap",
+    "dist_linux_appimage": "npm run build && electron-builder --linux --config.linux.target=AppImage",
+
+    "dist_mac_dmg": "npm run build && electron-builder --mac --config.mac.target=dmg",
+    "dist_mac_pkg": "npm run build && electron-builder --mac --config.mac.target=pkg"
   },
   "repository": {
     "type": "git",

@@ -56,7 +56,7 @@ declare global {
       refreshSpotifyToken(refresh_token: string): Promise<string | null>;
       spotifyLogout(): Promise<boolean>;
       getSpotifyAccessToken(): Promise<{ access_token: string; refresh_token: string } | null>;
-      onLoginStatus(callback: (status: { spotify: boolean }) => void): void;
+      onLoginStatus(callback: (status: { spotify?: boolean }) => void): void;
       getUserPlaylists(): Promise<SpotifyPlaylist[] | null>;
       getManifest: () => Promise<Record<string, { playlistId: string; name: string, keybind?: string | null }>>;
       selectPlaylist: (playlistId: string) => Promise<boolean>;

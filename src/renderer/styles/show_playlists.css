@@ -1,0 +1,144 @@
+.playlists-container {
+  display: grid;
+  grid-template-columns: repeat(2, 380px);
+  row-gap: 20px;
+  column-gap: 10px;
+  padding: 10px;
+  padding-bottom: 0px;
+  padding-top: 5px;
+  height: 420px;
+}
+
+.playlists-div {
+  margin: 5px;
+  background-color: #212121;
+  border-radius: 10px;
+  border: solid 1px #a1a1a1;
+  box-shadow: 0 0 5px #acacac;
+}
+
+.top {
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-bottom: 5px;
+}
+
+.div-alreadyExists {
+  display: inline-flex;
+  overflow: hidden;
+  width: 365px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.songName-alreadyExists {
+  display: flex;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ec0000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: break-word;
+}
+
+.text-alreadyExists {
+  justify-content: start;
+  display: flex;
+  font-size: 14px;
+  color: #ec0000;
+}
+
+.playlists-reloadCache {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: scale 0.3s, background-color 0.3s;
+}
+
+.playlists-reloadCache:hover {
+  scale: 1.2;
+  background-color: #4e4e4e;
+}
+
+.playlists-entry-name {
+  font-size: 16px;
+}
+
+.playlists-closePlaylist {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: scale 0.3s, background-color 0.3s;
+}
+
+.playlists-closePlaylist:hover {
+  scale: 1.2;
+  background-color: #4e4e4e;
+}
+
+.playlists-keybind-input {
+  display: flex;
+  justify-self: center;
+  color: #dedede;
+  background-color: #323232;
+  border: solid 1px #8f8f8f;
+  border-radius: 5px;
+  padding: 5px;
+  font-weight: bold;
+}
+
+.playlists-keybind-input:focus-visible {
+  color: #fff;
+  background-color: #4a4a4a;
+  border: solid 2px #bcbcbc;
+}
+
+.playlists-tracks-div {
+  border: solid 1px rgb(127 127 127);
+  margin: 5px;
+  margin-top: 5px;
+  border-radius: 5px;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.tracks-img {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  margin: 2px;
+}
+
+.tracks-container {
+  width: 100%;
+}
+
+.tracks-name {
+  font-size: 16px;
+  font-weight: bold;
+  height: 24px;
+  width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+
+.tracks-artists {
+  color: #cccccc;
+  border-top: solid 1px #cccccc;
+  font-size: 14px;
+  width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}

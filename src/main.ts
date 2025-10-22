@@ -1,8 +1,10 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, Notification, shell } from "electron";
+import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, shell, dialog } from "electron";
 import * as path from "path";
-import { clearSpotifyTokens, getSpotifyAccessToken } from "./main/tokenManager";
 import { loginSpotify, refreshSpotifyToken } from "./main/spotifyAuth";
-import fetch from "node-fetch";
+import {
+  clearSpotifyTokens,
+  getSpotifyAccessToken
+} from "./main/tokenManager";
 import {
   savePlaylist, loadManifest, getPlaylists, getTracks, saveManifest,
   deletePlaylistDb, ManifestEntry, getDbPath, closeDb, clearPlaylist,
@@ -11,11 +13,15 @@ import {
 import { getCurrentPlayingTrack } from "./main/spotify"
 import * as fs from "fs";
 
-const currentVersion = app.getVersion();
+let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
+let tokenRefreshInterval: NodeJS.Timeout | null = null;
+let settingsWindow: BrowserWindow | null = null;
 
 interface GitHubRelease {
   tag_name: string;
   html_url: string;
+  body: string;
 }
 
 async function checkForUpdates() {
@@ -29,7 +35,7 @@ async function checkForUpdates() {
     const currentVersion = app.getVersion();
 
     if (compareVersions(latestVersion, currentVersion) > 0) {
-      showUpdateNotification(latestVersion, release.html_url);
+      showUpdateDialog(latestVersion, release.html_url, release.body);
     } else {
       console.log("App is up to date");
     }
@@ -49,24 +55,32 @@ function compareVersions(v1: string, v2: string): number {
   return 0;
 }
 
-function showUpdateNotification(latestVersion: string, url: string) {
-  const notif = new Notification({
-    title: "Update Available",
-    body: `New version ${latestVersion} is available. Click to download.`,
-  });
+function showUpdateDialog(
+  latestVersion: string,
+  url: string,
+  body: string,
+  parent?: BrowserWindow
+) {
+  const message = `New version ${latestVersion} is available.\n${body}`;
 
-  notif.on("click", () => {
-    shell.openExternal(url); // opens GitHub release page
-  });
+  const options: Electron.MessageBoxSyncOptions = {
+    type: 'none',
+    buttons: ['Download', 'Cancel'],
+    defaultId: 0,
+    cancelId: 1,
+    title: 'Update Is Available',
+    message,
+    noLink: true,
+  };
 
-  notif.show();
+  const result = parent
+    ? dialog.showMessageBoxSync(parent, options)
+    : dialog.showMessageBoxSync(options);
+
+  if (result === 0) {
+    shell.openExternal(url);
+  }
 }
-
-
-
-let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
-let tokenRefreshInterval: NodeJS.Timeout | null = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -89,7 +103,7 @@ function createWindow() {
     zoomToPageWidth: false,
     useContentSize: true,
     center: true,
-    autoHideMenuBar: true,
+    autoHideMenuBar: true
   });
 
   mainWindow.loadFile(path.join(__dirname, "renderer/index.html"));
@@ -120,7 +134,7 @@ function startSpotifyTokenRefresher() {
       if (!token) return;
 
       const now = Date.now();
-      const expiresAt = token.expires_at; // store this when saving tokens
+      const expiresAt = token.expires_at;
       if (now > expiresAt - 60_000) { // refresh 1 min before expiry
         await refreshSpotifyToken(token.refresh_token);
         console.log("Spotify token refreshed");
@@ -182,7 +196,11 @@ ipcMain.handle("get-spotify-tokens", async () => {
 // Login method
 ipcMain.handle("spotify-login", async (): Promise<{ access_token: string; refresh_token: string } | null> => {
   try {
-    return await loginSpotify();
+    const tokens = await loginSpotify();
+    if (tokens) {
+      sendToMainWindow("login-status", { spotify: true });
+    }
+    return tokens;
   } catch (err) {
     console.error("Spotify login failed:", err);
     return null;
@@ -247,6 +265,7 @@ ipcMain.handle("spotify-logout", async () => {
     // 5. Clear manifest
     saveManifest({}); // overwrite with empty manifest
 
+    sendToMainWindow("login-status", { spotify: false });
     console.log("Logged out, cleared databases and manifest");
     return true;
   } catch (err) {
@@ -573,4 +592,28 @@ export function registerAllKeybinds(win: BrowserWindow, manifest: Record<string,
       }
     });
   }
+}
+
+// Settings
+export function createSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 400,
+    height: 250,
+    resizable: false,
+    title: "Settings",
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  settingsWindow.loadFile(path.join(__dirname, "../renderer/settings.html"));
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
 }

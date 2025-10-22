@@ -13,9 +13,9 @@ function copyFolder(srcDir, destDir) {
       copyFolder(srcPath, destPath);
     } else {
       fs.copyFileSync(srcPath, destPath);
-      console.log(`✓ Copied: ${srcPath} -> ${destPath}`);
     }
   }
+  console.log("Copied.")
 }
 
 // Copy everything from src/renderer → dist/renderer

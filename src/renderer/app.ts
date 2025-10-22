@@ -53,13 +53,7 @@ const loginMethods: LoginMethod[] = [
     name: "YouTube Music",
     img: "../assets/icons/youtube.png",
     disabled: true, // not implemented yet
-  },
-  {
-    id: "yandex",
-    name: "Yandex Music",
-    img: "../assets/icons/yandex.png",
-    disabled: true, // not implemented yet
-  },
+  }
 ];
 
 // === UTILITIES === \\
@@ -226,17 +220,14 @@ function showLogoutMethods() {
 // === INIT === \\
 loadLoggedInMethods();
 window.api.onLoginStatus((status) => {
-  if (status.spotify) loggedInMethods.push("spotify");
+  if (status.spotify === true) {
+    loggedInMethods.push("spotify");
+  } else if (status.spotify === false) {
+    loggedInMethods = loggedInMethods.filter((id) => id !== "spotify");
+  }
 });
 
-
-// === ADD PLAYLIST FUNCTION === \\
-async function addPlaylist() {
-  if (addPlaylistMethodsVisible) {
-    main.innerHTML = "";
-    addPlaylistMethodsVisible = false;
-    return;
-  }
+async function showSpotifyPlaylists() {
   main.innerHTML = "Loading playlists...";
 
   const playlists: SpotifyPlaylist[] | null = await window.api.getUserPlaylists();
@@ -272,10 +263,11 @@ async function addPlaylist() {
   editablePlaylists.forEach((pl) => {
     const div = document.createElement("div");
     div.classList.add("addplaylist-playlist-div");
-    div.title = pl.images[0] ? `Add \"${pl.name}\"` : "Something is wrong with image";
+    // Guard against playlists with null/empty images
+    div.title = pl.images?.[0]?.url ? `Add \"${pl.name}\"` : "Something is wrong with image";
 
     const img = document.createElement("img");
-    img.src = pl.images[0]?.url || "../assets/icons/default_playlist.png";
+    img.src = pl.images?.[0]?.url || "../assets/icons/default_playlist.png";
     img.alt = pl.name;
     img.classList.add("addplaylist-img")
     div.appendChild(img);
@@ -311,6 +303,39 @@ async function addPlaylist() {
   addPlaylistMethodsVisible = true;
 }
 
+// === ADD PLAYLIST FUNCTION === \\
+async function addPlaylist() {
+  if (addPlaylistMethodsVisible) {
+    main.innerHTML = "";
+    addPlaylistMethodsVisible = false;
+    return;
+  }
+  main.innerHTML = ""; // Clear the main area
+
+  const addMethods: MethodAction[] = loginMethods.map((service) => {
+    const isLogged = loggedInMethods.includes(service.id);
+    return {
+      id: service.id,
+      name: service.name,
+      img: service.img,
+      disabled: service.disabled || !isLogged,
+      infoText: service.disabled
+        ? `${service.name} is not available yet`
+        : !isLogged
+          ? `You must be logged into ${service.name} to add a playlist`
+          : `Add a playlist from ${service.name}`,
+      onClick: async () => {
+        if (service.id === 'spotify') {
+          await showSpotifyPlaylists();
+        }
+      }
+    };
+  });
+
+  renderMethodsGrid(addMethods);
+  addPlaylistMethodsVisible = true;
+}
+
 async function showPlaylists() {
   if (!main) return;
 
@@ -318,6 +343,15 @@ async function showPlaylists() {
 
   // Get manifest from main process
   const manifest = await window.api.getManifest();
+
+  if (!manifest || Object.keys(manifest).length === 0) {
+    const message = document.createElement("p");
+    message.classList.add("no-playlists-message");
+    message.textContent = "Press Add Playlist (+) button.";
+    main.appendChild(message);
+    return;
+  }
+
   // Playlist container
   const playlistContainer = document.createElement("div");
   playlistContainer.classList.add("playlists-container");
@@ -649,17 +683,38 @@ window.api.onTrackAlreadyExists((playlistIndex: number, trackName: string) => {
   const playlistDiv = document.querySelectorAll(".alreadyKeyinput")[playlistIndex - 1];
   if (!playlistDiv) return;
 
-  const existingMsg = playlistDiv.querySelector(".alreadyExists");
+  const existingMsg = playlistDiv.querySelector(".div-alreadyExists");
   if (existingMsg) return;
 
-  const alreadyExists = document.createElement("p");
-  alreadyExists.classList.add("alreadyExists");
-  alreadyExists.textContent = `Track already exists in playlist`;
+  const alreadyDiv = document.createElement("div");
+  alreadyDiv.classList.add("div-alreadyExists");
 
-  playlistDiv.appendChild(alreadyExists);
+  const songNameHelperfirst = document.createElement("span");
+  songNameHelperfirst.classList.add("text-alreadyExists");
+  songNameHelperfirst.textContent = `"`;
+  const songNameHelpersecond = document.createElement("span");
+  songNameHelpersecond.classList.add("text-alreadyExists");
+  songNameHelpersecond.textContent = `"`;
+
+  const songName = document.createElement("span");
+  songName.classList.add("songName-alreadyExists");
+  songName.textContent = `${trackName}`;
+
+  const alreadyExists = document.createElement("p");
+  alreadyExists.classList.add("text-alreadyExists");
+  alreadyExists.textContent = `- already exists in playlist`;
+
+
+  alreadyDiv.appendChild(songNameHelperfirst);
+  alreadyDiv.appendChild(songName);
+  alreadyDiv.appendChild(songNameHelpersecond);
+  alreadyDiv.appendChild(alreadyExists);
+
+  playlistDiv.appendChild(alreadyDiv);
 
   setTimeout(() => {
-    alreadyExists.remove();
+    songName.remove();
+    alreadyDiv.remove();
   }, 2000);
 });
 

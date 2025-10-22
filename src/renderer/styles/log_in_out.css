@@ -1,0 +1,25 @@
+.div-grid {
+  display: flex;
+  color: white;
+  text-align: center;
+}
+
+.login-method-div {
+  width: 80px;
+  height: 120px;
+  margin: 10px;
+  padding: 5px;
+  background-color: #212121;
+  border-radius: 10px;
+  transition: transform 0.3s, margin-right 0.3s, background-color 0.3s;
+}
+
+.login-method-img {
+  width: 64px;
+  height: 64px;
+}
+
+.login-method-div:hover {
+  background-color: #535353;
+  transform: scale(1.07);
+}

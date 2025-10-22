@@ -1,0 +1,41 @@
+.addplaylist-div-grid {
+  display: flex;
+  flex-wrap: wrap;
+  overflow-wrap: break-word;
+  flex-direction: row;
+  align-items: center;
+}
+
+.addplaylist-playlist-div {
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  border: solid 1px #ffffff;
+  border-radius: 3px;
+  background-color: #212121;
+  margin: 10px;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.addplaylist-playlist-div:hover {
+  transform: scale(1.1);
+  background-color: #373737;
+}
+
+.addplaylist-img {
+  justify-self: center;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  margin: 5px;
+}
+
+.addplaylist-name {
+  word-break: break-word;
+  max-height: 48px;
+  padding: 3px;
+  width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
