@@ -36,6 +36,7 @@ const loginBtn = document.getElementById("btn-login")!;
 const logoutBtn = document.getElementById("btn-logout")!;
 const hideBtn = document.getElementById("btn-hide")!;
 const addPlaylistBtn = document.getElementById("btn-add-playlist")!;
+const closeBtn = document.getElementById("btn-close")!;
 
 // === LOGIN METHODS === \\
 const loginMethods: LoginMethod[] = [
@@ -447,10 +448,33 @@ async function showPlaylists() {
     playlistContainer.appendChild(playlistDiv);
 
     reloadCache.addEventListener("click", async () => {
-      reloadCache.style.pointerEvents = "none";
-      reloadCache.style.backgroundColor = "#202020"
-      reloadCache.style.cursor = "progress";
+      playlistDiv.style.pointerEvents = "none";
+      playlistDiv.style.backgroundColor = "#242424ff"
+      playlistDiv.style.cursor = "progress";
       closePlaylist.disabled = true;
+      reloadCache.disabled = true;
+
+      const waitBackground = document.createElement("div");
+      waitBackground.style.backgroundColor = "#000000ba";
+      waitBackground.style.zIndex = "9998";
+      waitBackground.style.position = "absolute";
+      waitBackground.style.width = "368px";
+      waitBackground.style.height = "403px";
+      waitBackground.style.top = "80px";
+      waitBackground.style.borderRadius = "10px";
+
+
+      const wait = document.createElement("div");
+      wait.textContent = "Updating Cache...";
+      wait.style.position = "absolute";
+      wait.style.zIndex = "9999";
+      wait.style.justifySelf = "center";
+      wait.style.top = "260px";
+      wait.style.fontWeight = "bold";
+
+      playlistDiv.appendChild(waitBackground);
+      playlistDiv.appendChild(wait);
+
       const success = await window.api.reloadPlaylist(Number(indexStr));
       if (success) showPlaylists();
       else alert("Failed to reload playlist. Check internet or Spotify API status.");
@@ -742,6 +766,7 @@ loginBtn.addEventListener("click", toggleLoginPanel);
 hideBtn.addEventListener("click", () => window.api.hideToTray());
 addPlaylistBtn.addEventListener("click", toggleAddPlaylistPanel);
 logoutBtn.addEventListener("click", toggleLogoutPanel);
+closeBtn.addEventListener("click", () => window.api.closeWindow());
 
 document.addEventListener("DOMContentLoaded", async () => {
   await showPlaylists();

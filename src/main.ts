@@ -16,7 +16,6 @@ import * as fs from "fs";
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let tokenRefreshInterval: NodeJS.Timeout | null = null;
-let settingsWindow: BrowserWindow | null = null;
 
 interface GitHubRelease {
   tag_name: string;
@@ -93,12 +92,17 @@ function createWindow() {
       spellcheck: false,
       zoomFactor: 1.0,
       minimumFontSize: 12,
+      devTools: false,
+      webSecurity: true,
+      disableHtmlFullscreenWindowResize: true,
+      textAreasAreResizable: false,
     },
     title: "Playlist Plus",
+    frame: false,
     icon: path.join(__dirname, "assets/icons/app_icon.ico"),
     resizable: false,
     hasShadow: false,
-    // fullscreenable: false,
+    fullscreenable: false,
     titleBarOverlay: false,
     zoomToPageWidth: false,
     useContentSize: true,
@@ -145,6 +149,28 @@ function startSpotifyTokenRefresher() {
   }, intervalMs);
 }
 
+function createTray() {
+  if (tray) return;
+
+  tray = new Tray(path.join(__dirname, "assets/icons/app_icon.ico"));
+  tray.setToolTip("Playlist Plus");
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "Open",
+      click: () => mainWindow?.show(),
+    },
+    {
+      label: "Hide",
+      click: () => mainWindow?.hide(),
+    },
+    { label: "Close", click: () => app.quit() },
+  ]);
+  tray.setContextMenu(contextMenu);
+
+  tray.on("double-click", () => mainWindow?.show());
+}
+
 app.whenReady().then(async () => {
   createWindow();
 
@@ -170,6 +196,7 @@ app.whenReady().then(async () => {
   });
   checkForUpdates();
   setInterval(checkForUpdates, 1000 * 60 * 60 * 24); // every 24h
+  createTray();
 });
 
 app.on("will-quit", () => {
@@ -207,29 +234,6 @@ ipcMain.handle("spotify-login", async (): Promise<{ access_token: string; refres
   }
 });
 
-// Hide in tray
-function createTray() {
-  if (tray) return;
-
-  tray = new Tray(path.join(__dirname, "assets/icons/app_icon.ico"));
-  tray.setToolTip("Playlist Plus");
-
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "Open",
-      click: () => mainWindow?.show(),
-    },
-    {
-      label: "Hide",
-      click: () => mainWindow?.hide(),
-    },
-    { label: "Close", click: () => app.quit() },
-  ]);
-  tray.setContextMenu(contextMenu);
-
-  tray.on("double-click", () => mainWindow?.show());
-}
-
 function hideToTray() {
   createTray();
   mainWindow?.hide();
@@ -237,6 +241,26 @@ function hideToTray() {
 
 ipcMain.on("hide-to-tray", () => {
   hideToTray();
+});
+
+function closeWindow() {
+  // ensure tray is removed and main window closed before quitting
+  try {
+    tray?.destroy();
+  } catch (e) {}
+  try {
+    if (mainWindow) {
+      // remove listeners to avoid any prevention of close
+      mainWindow.removeAllListeners("close");
+      mainWindow.close();
+      mainWindow = null;
+    }
+  } catch (e) {}
+  app.quit();
+}
+
+ipcMain.on("close-window", () => {
+  closeWindow();
 });
 
 // Logout method
@@ -593,28 +617,4 @@ export function registerAllKeybinds(win: BrowserWindow, manifest: Record<string,
       }
     });
   }
-}
-
-// Settings
-export function createSettingsWindow() {
-  if (settingsWindow) {
-    settingsWindow.focus();
-    return;
-  }
-
-  settingsWindow = new BrowserWindow({
-    width: 400,
-    height: 250,
-    resizable: false,
-    title: "Settings",
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-    },
-  });
-
-  settingsWindow.loadFile(path.join(__dirname, "../renderer/settings.html"));
-
-  settingsWindow.on("closed", () => {
-    settingsWindow = null;
-  });
 }
