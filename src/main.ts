@@ -428,7 +428,8 @@ ipcMain.handle("delete-playlist", async (_, index: number) => {
 
     // 4. Save normalized manifest
     saveManifest(newManifest);
-    await showPlaylists();
+    // Notify renderer to refresh the playlists UI (send explicit null payload)
+    sendToMainWindow("load-playlists", null);
     return true;
   } catch (err) {
     console.error("Failed to delete playlist:", err);

@@ -232,13 +232,16 @@ async function showSpotifyPlaylists() {
 
   const playlists: SpotifyPlaylist[] | null = await window.api.getUserPlaylists();
   if (!playlists || playlists.length === 0) {
-    main.innerHTML = "No playlists found or failed to fetch.";
+    main.innerHTML = "No playlists found or failed to fetch. Check your connection, spotify API status or try to logout and login again.";
     return;
   }
 
   // Get current user's Spotify ID
   const tokenData = await window.api.getSpotifyAccessToken();
-  if (!tokenData) return;
+  if (!tokenData) {
+    main.innerHTML = "Failed to get spotify token or refresh it. Check your connection, spotify API status or try to logout and login again."
+    return
+  };
 
   const userRes = await fetch("https://api.spotify.com/v1/me", {
     headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -367,6 +370,8 @@ async function showPlaylists() {
 
     const playlistDiv = document.createElement("div");
     playlistDiv.classList.add("playlists-div");
+    // expose the manifest index so other handlers can find this element reliably
+    playlistDiv.setAttribute("data-index", indexStr);
 
     const top = document.createElement("div");
     top.classList.add("top");
@@ -448,7 +453,7 @@ async function showPlaylists() {
       closePlaylist.disabled = true;
       const success = await window.api.reloadPlaylist(Number(indexStr));
       if (success) showPlaylists();
-      else alert("Failed to reload playlist. Check internet or Spotify API.");
+      else alert("Failed to reload playlist. Check internet or Spotify API status.");
     });
     closePlaylist.addEventListener("click", async () => {
       const confirmed = confirm(`Delete playlist "${entry.name}"?`);
@@ -636,81 +641,95 @@ async function showPlaylists() {
     keybindInput.addEventListener("click", () => keybindInput.focus());
   }
   main.appendChild(playlistContainer);
-  window.api.onPlaylistUpdated((playlistIndex: number) => {
-    const playlistDiv = playlistContainer.querySelector(`.playlists-div[data-index="${playlistIndex}"]`);
-    if (!playlistDiv) return;
-
-    // Fetch latest track (the one just added)
-    window.api.getTracks(manifest[playlistIndex].playlistId).then(tracks => {
-      const lastTrack = tracks[tracks.length - 1];
-      if (!lastTrack) return;
-
-      const tracksDiv = document.createElement("div");
-      tracksDiv.classList.add("playlists-tracks-div");
-
-      const img = document.createElement("img");
-      img.src = lastTrack.album_image;
-      img.title = `${lastTrack.name} - ${lastTrack.artists}`;
-      img.alt = `${lastTrack.name} - ${lastTrack.artists}`;
-      img.classList.add("tracks-img");
-
-      const container = document.createElement("div");
-      container.classList.add("tracks-container");
-
-      const name = document.createElement("p");
-      name.textContent = lastTrack.name;
-      name.classList.add("tracks-name");
-
-      const artists = document.createElement("p");
-      artists.textContent = lastTrack.artists;
-      artists.classList.add("tracks-artists");
-
-      container.appendChild(name);
-      container.appendChild(artists);
-      tracksDiv.appendChild(img);
-      tracksDiv.appendChild(container);
-
-      playlistDiv.appendChild(tracksDiv);
-    });
-  });
 }
 
-window.api.onPlaylistUpdated(() => {
-  showPlaylists();
+// Global handler: append latest track when a specific playlist is updated
+window.api.onPlaylistUpdated(async (playlistIndex: number) => {
+  try {
+    const playlistDiv = document.querySelector(`.playlists-div[data-index="${playlistIndex}"]`);
+    if (!playlistDiv) return;
+
+    const manifest = await window.api.getManifest();
+    const entry = manifest[playlistIndex];
+    if (!entry) return;
+
+    const tracks = await window.api.getTracks(entry.playlistId);
+    const lastTrack = tracks[tracks.length - 1];
+    if (!lastTrack) return;
+
+    const tracksDiv = document.createElement("div");
+    tracksDiv.classList.add("playlists-tracks-div");
+
+    const img = document.createElement("img");
+    img.src = lastTrack.album_image;
+    img.title = `${lastTrack.name} - ${lastTrack.artists}`;
+    img.alt = `${lastTrack.name} - ${lastTrack.artists}`;
+    img.classList.add("tracks-img");
+
+    const container = document.createElement("div");
+    container.classList.add("tracks-container");
+
+    const name = document.createElement("p");
+    name.textContent = lastTrack.name;
+    name.classList.add("tracks-name");
+
+    const artists = document.createElement("p");
+    artists.textContent = lastTrack.artists;
+    artists.classList.add("tracks-artists");
+
+    container.appendChild(name);
+    container.appendChild(artists);
+    tracksDiv.appendChild(img);
+    tracksDiv.appendChild(container);
+
+    // Keep only the last 5 preview tracks: if there are already 5, remove the oldest
+    const existingPreviews = playlistDiv.querySelectorAll('.playlists-tracks-div');
+    if (existingPreviews.length >= 5) {
+      // remove the first (oldest) preview row
+      const first = existingPreviews[0] as HTMLElement | undefined;
+      if (first) first.remove();
+    }
+    playlistDiv.appendChild(tracksDiv);
+  } catch (err) {
+    console.error("Error handling playlist update:", err);
+  }
 });
 
 window.api.onTrackAlreadyExists((playlistIndex: number, trackName: string) => {
-  const playlistDiv = document.querySelectorAll(".alreadyKeyinput")[playlistIndex - 1];
+  // Find the playlist DIV by the manifest index (data-index)
+  const playlistDiv = document.querySelector(`.playlists-div[data-index="${playlistIndex}"]`);
   if (!playlistDiv) return;
 
-  const existingMsg = playlistDiv.querySelector(".div-alreadyExists");
+  const alreadyKeyinput = playlistDiv.querySelector('.alreadyKeyinput');
+  if (!alreadyKeyinput) return;
+
+  const existingMsg = alreadyKeyinput.querySelector('.div-alreadyExists');
   if (existingMsg) return;
 
-  const alreadyDiv = document.createElement("div");
-  alreadyDiv.classList.add("div-alreadyExists");
+  const alreadyDiv = document.createElement('div');
+  alreadyDiv.classList.add('div-alreadyExists');
 
-  const songNameHelperfirst = document.createElement("span");
-  songNameHelperfirst.classList.add("text-alreadyExists");
+  const songNameHelperfirst = document.createElement('span');
+  songNameHelperfirst.classList.add('text-alreadyExists');
   songNameHelperfirst.textContent = `"`;
-  const songNameHelpersecond = document.createElement("span");
-  songNameHelpersecond.classList.add("text-alreadyExists");
+  const songNameHelpersecond = document.createElement('span');
+  songNameHelpersecond.classList.add('text-alreadyExists');
   songNameHelpersecond.textContent = `"`;
 
-  const songName = document.createElement("span");
-  songName.classList.add("songName-alreadyExists");
+  const songName = document.createElement('span');
+  songName.classList.add('songName-alreadyExists');
   songName.textContent = `${trackName}`;
 
-  const alreadyExists = document.createElement("p");
-  alreadyExists.classList.add("text-alreadyExists");
+  const alreadyExists = document.createElement('p');
+  alreadyExists.classList.add('text-alreadyExists');
   alreadyExists.textContent = `- already exists in playlist`;
-
 
   alreadyDiv.appendChild(songNameHelperfirst);
   alreadyDiv.appendChild(songName);
   alreadyDiv.appendChild(songNameHelpersecond);
   alreadyDiv.appendChild(alreadyExists);
 
-  playlistDiv.appendChild(alreadyDiv);
+  alreadyKeyinput.appendChild(alreadyDiv);
 
   setTimeout(() => {
     songName.remove();

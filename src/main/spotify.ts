@@ -26,7 +26,8 @@ export async function getCurrentPlayingTrack(): Promise<SpotifyTrack | null> {
       tokenData = await getSpotifyAccessToken();
       if (!tokenData) return null;
 
-      res = await fetch("https://api.spotify.com/v1/me/playlists", {
+      // Retry the same endpoint we originally called
+      res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
         headers: { Authorization: `Bearer ${tokenData.access_token}` },
       });
     }
