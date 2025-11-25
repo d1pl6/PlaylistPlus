@@ -36,6 +36,7 @@ const loginBtn = document.getElementById("btn-login")!;
 const logoutBtn = document.getElementById("btn-logout")!;
 const hideBtn = document.getElementById("btn-hide")!;
 const addPlaylistBtn = document.getElementById("btn-add-playlist")!;
+const closeBtn = document.getElementById("btn-close")!;
 
 // === LOGIN METHODS === \\
 const loginMethods: LoginMethod[] = [
@@ -742,6 +743,7 @@ loginBtn.addEventListener("click", toggleLoginPanel);
 hideBtn.addEventListener("click", () => window.api.hideToTray());
 addPlaylistBtn.addEventListener("click", toggleAddPlaylistPanel);
 logoutBtn.addEventListener("click", toggleLogoutPanel);
+closeBtn.addEventListener("click", () => window.api.closeWindow());
 
 document.addEventListener("DOMContentLoaded", async () => {
   await showPlaylists();

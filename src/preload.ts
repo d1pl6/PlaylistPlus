@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('api', {
 
   hideToTray: () => ipcRenderer.send('hide-to-tray'),
 
+  closeWindow: () => ipcRenderer.send('close-window'),
+
   refreshSpotifyToken: (refresh_token: string) =>
     ipcRenderer.invoke('spotify-refresh-token', refresh_token),
 

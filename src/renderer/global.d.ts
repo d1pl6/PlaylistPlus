@@ -53,6 +53,7 @@ declare global {
       onLoadPlaylists(callback: () => void): void;
       spotifyLogin(): Promise<{ access_token: string; refresh_token: string } | null>;
       hideToTray(): void;
+      closeWindow(): void;
       refreshSpotifyToken(refresh_token: string): Promise<string | null>;
       spotifyLogout(): Promise<boolean>;
       getSpotifyAccessToken(): Promise<{ access_token: string; refresh_token: string } | null>;

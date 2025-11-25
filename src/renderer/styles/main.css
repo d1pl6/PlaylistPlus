@@ -65,7 +65,7 @@ body::-webkit-scrollbar-thumb {
 .img:hover {
   background-color: #00d334;
   border: solid 3px #1dbe00;
-  transform: scale(1.2);
+  transform: scale(1.1);
 }
 
 .img:disabled {
